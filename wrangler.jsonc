@@ -1,0 +1,8 @@
+{
+  "name": "number-garden",
+  "compatibility_date": "2026-10-19",
+  "assets": {
+    "directory": "./dist",
+    "html_handling": "auto-trailing-slash"
+  }
+}
