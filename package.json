@@ -1,9 +1,17 @@
 {
   "name": "number-garden",
+  "version": "1.0.0",
   "private": true,
-  "version": "0.1.0",
+  "type": "module",
+  "description": "A tactile math playground with an unexpected seventh lesson.",
   "scripts": {
-    "build": "node -e \"console.log('Static dist ready')\"",
-    "deploy": "wrangler deploy"
+    "build": "npm run check",
+    "start": "python3 -m http.server 4173 --directory dist",
+    "check": "node --check dist/game.js && node --check dist/audio.js && node --check dist/scenes.js && node --check dist/core.js",
+    "test": "node --test tests/*.test.mjs",
+    "package:itch": "python3 scripts/package-itch.py"
+  },
+  "devDependencies": {
+    "jsdom": "^26.1.0"
   }
 }
