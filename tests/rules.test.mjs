@@ -4,13 +4,15 @@ import { readFileSync,statSync,readdirSync } from 'node:fs';
 import { resolve,join } from 'node:path';
 import { QUESTIONS,judge,parseAnswer,Spring,uiLayout } from '../dist/core.js';
 
-test('every numeric answer to puzzle seven triggers the finale, including the correct answer',()=>{
-  for(let answer=0;answer<=99;answer++)assert.equal(judge(6,answer),'scare',String(answer));
-  assert.equal(judge(6,''),'empty');assert.equal(judge(6,'abc'),'empty');
+test('every numeric answer to puzzle five triggers the finale, including the correct answer',()=>{
+  assert.equal(QUESTIONS.length,5);
+  assert.equal(QUESTIONS[4].answer,6);
+  for(let answer=0;answer<=99;answer++)assert.equal(judge(4,answer),'scare',String(answer));
+  assert.equal(judge(4,''),'empty');assert.equal(judge(4,'abc'),'empty');
 });
-test('the first six puzzles have coherent arithmetic and allow retry',()=>{
-  const expected=[3+2,4+3,9-3,8-3,2+2+2,6+2];
-  for(let i=0;i<6;i++){
+test('the first four puzzles have coherent arithmetic and allow retry',()=>{
+  const expected=[3+2,4+3,9-3,8-3];
+  for(let i=0;i<4;i++){
     assert.equal(QUESTIONS[i].answer,expected[i]);assert.equal(judge(i,expected[i]),'correct');
     assert.equal(judge(i,expected[i]+1),'retry');assert.ok(QUESTIONS[i].choices.includes(expected[i]));
     assert.equal(new Set(QUESTIONS[i].choices).size,QUESTIONS[i].choices.length);
@@ -41,6 +43,7 @@ test('all shipped local resources resolve and the entire distribution stays belo
   for(const file of files.filter(p=>/\.(html|css|js)$/.test(p))){
     const text=readFileSync(file,'utf8');
     const references=[...text.matchAll(/(?:src=|href=)["'](\.\/[^"']+)|url\(['"]?(\.\/[^)'"\s]+)|from ['"](\.\/[^'"\s]+)/g)];
+    for(const match of text.matchAll(/new URL\(['"](\.\/[^'"]+)/g))assert.ok(statSync(resolve(file,'..',match[1])).isFile());
     for(const match of references){const ref=match[1]||match[2]||match[3];assert.ok(statSync(resolve(file,'..',ref)).isFile(),`${file}: ${ref}`);}
   }
   for(const font of ['fredoka','nunito'])assert.equal(readFileSync(join(root,'assets',font+'.woff2')).subarray(0,4).toString(),'wOF2');

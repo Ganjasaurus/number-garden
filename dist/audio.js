@@ -1,7 +1,11 @@
-// Entire soundtrack is synthesized locally. No audio downloads or autoplay dependency.
+// Music is synthesized locally; the scare uses a bundled, processed human recording.
+const SCREAM_URL = new URL('./assets/scream-deep.mp3', import.meta.url);
 export class GardenAudio {
   constructor({ muted=false, volume=.55 }={}) {
     this.muted=muted;this.volume=volume;this.ctx=null;this.voices=new Set();this.musicTimer=0;this.musicOn=false;this.beat=0;this.suspended=false;
+    this.screamBuffer=null;this.screamReady=null;this.fallbackActive=false;this.fallbackResume=false;this.media=null;
+    // Fetch early, decode after Play unlocks the context, and never delay gameplay.
+    this.screamBytes=fetch(SCREAM_URL).then(response=>response.ok?response.arrayBuffer():null).catch(()=>null);
   }
   async unlock() {
     try {
@@ -14,16 +18,17 @@ export class GardenAudio {
         const limiter=this.ctx.createDynamicsCompressor();
         limiter.threshold.value=-10;limiter.knee.value=10;limiter.ratio.value=14;limiter.attack.value=.003;limiter.release.value=.12;
         this.master.connect(limiter);limiter.connect(this.ctx.destination);
-        this.noiseBuffer=this.ctx.createBuffer(1,this.ctx.sampleRate,this.ctx.sampleRate);
-        const data=this.noiseBuffer.getChannelData(0);
-        for(let i=0;i<data.length;i++)data[i]=Math.random()*2-1;
+        this.screamReady=this.screamBytes.then(bytes=>bytes?this.ctx.decodeAudioData(bytes):null).then(buffer=>{this.screamBuffer=buffer;return buffer;}).catch(()=>null);
       }
       if(this.ctx.state==='suspended'&&!this.suspended)await this.ctx.resume();
     } catch { /* Audio failure must never prevent answering or replay. */ }
   }
   setMuted(muted) {this.muted=muted;this.syncVolume();}
   setVolume(value) {this.volume=Math.max(0,Math.min(1,value));this.syncVolume();}
-  syncVolume() {if(this.ctx)this.master.gain.setTargetAtTime(this.muted?0:this.volume*.65,this.ctx.currentTime,.025);}
+  syncVolume() {
+    if(this.ctx)this.master.gain.setTargetAtTime(this.muted?0:this.volume*.65,this.ctx.currentTime,.025);
+    if(this.media){this.media.muted=this.muted;this.media.volume=this.volume*.65;}
+  }
   track(source,nodes=[]) {
     this.voices.add(source);
     source.onended=()=>{this.voices.delete(source);source.disconnect();nodes.forEach(n=>n.disconnect());};
@@ -36,15 +41,6 @@ export class GardenAudio {
     if(endFreq)o.frequency.exponentialRampToValueAtTime(endFreq,t+duration);
     g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(level,t+.012);g.gain.exponentialRampToValueAtTime(.0001,t+duration);
     o.connect(g);g.connect(this.master);this.track(o,[g]);o.start(t);o.stop(t+duration+.03);
-  }
-  noise(duration,level,frequency=500,delay=0,rise=false) {
-    if(!this.ctx||this.muted||this.suspended)return;
-    const c=this.ctx,t=c.currentTime+delay,n=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();
-    n.buffer=this.noiseBuffer;n.loop=true;f.type='lowpass';f.frequency.value=frequency;
-    g.gain.setValueAtTime(rise?.0001:level,t);
-    if(rise)g.gain.exponentialRampToValueAtTime(level,t+duration*.8);
-    g.gain.exponentialRampToValueAtTime(.0001,t+duration);
-    n.connect(f);f.connect(g);g.connect(this.master);this.track(n,[f,g]);n.start(t);n.stop(t+duration+.03);
   }
   tap() {this.tone(520,.11,.045,'sine',0,700);}
   pick(n) {this.tone(280+n*33,.18,.07,'sine');this.tone(560+n*66,.12,.018,'triangle',.02);}
@@ -64,39 +60,43 @@ export class GardenAudio {
     };
     next();
   }
-  dread() {
-    this.music(false);this.stopVoices();
-    this.tone(39,5.5,.21,'sine',0,49);this.tone(41,5.5,.13,'triangle',0,57);
-    this.noise(5.5,.23,420,0,true);
-    this.tone(110,5.2,.035,'sawtooth',.15,370);
-  }
-  wrong(stage) {
-    const base=[185,130,95][stage];
-    this.tone(base,.75+stage*.25,.11+stage*.025,'sawtooth',0,base*.45);
-    this.tone(base*1.06,.75+stage*.25,.08+stage*.02,'square',0,base*.51);
-    this.noise(.4+stage*.25,.06+stage*.05,650+stage*500);
-  }
   scream() {
-    this.stopVoices();
-    if(!this.ctx||this.muted||this.suspended)return;
-    const c=this.ctx,t=c.currentTime;
-    this.tone(65,.95,.3,'sine',0,24);
-    this.noise(1.7,.3,6300);
-    // An inharmonic, tremulous voice through three vocal-formant filters.
-    [0,13,-19].forEach((detune,i)=>{
-      const source=c.createOscillator(),env=c.createGain(),vibrato=c.createOscillator(),depth=c.createGain();
-      source.type='sawtooth';source.detune.value=detune;
-      source.frequency.setValueAtTime(390+i*23,t);source.frequency.exponentialRampToValueAtTime(780+i*17,t+.11);source.frequency.exponentialRampToValueAtTime(230+i*13,t+1.65);
-      vibrato.frequency.value=37+i*4;depth.gain.value=60;vibrato.connect(depth);depth.connect(source.frequency);
-      env.gain.setValueAtTime(0,t);env.gain.linearRampToValueAtTime(.16,t+.008);env.gain.setValueAtTime(.13,t+.9);env.gain.exponentialRampToValueAtTime(.0001,t+1.7);
-      const filters=[800,1500,2800].map(frequency=>{
-        const f=c.createBiquadFilter();f.type='bandpass';f.frequency.value=frequency;f.Q.value=2.5;source.connect(f);f.connect(env);return f;
-      });
-      env.connect(this.master);this.track(source,[env,...filters]);this.track(vibrato,[depth]);source.start(t);source.stop(t+1.73);vibrato.start(t);vibrato.stop(t+1.73);
-    });
+    this.music(false);this.stopVoices();
+    if(this.muted||this.suspended)return;
+    if(this.ctx&&this.screamBuffer){
+      const c=this.ctx,t=c.currentTime,source=c.createBufferSource(),env=c.createGain();
+      source.buffer=this.screamBuffer;
+      env.gain.setValueAtTime(0,t);env.gain.linearRampToValueAtTime(1,t+.003);
+      source.connect(env);env.connect(this.master);this.track(source,[env]);
+      source.start(t);source.stop(t+this.screamBuffer.duration+.03);
+      return;
+    }
+    // Native media fallback retains the recorded voice if Web Audio cannot decode it.
+    try{
+      if(!this.media){
+        this.media=new Audio(SCREAM_URL.href);this.media.preload='auto';
+        this.media.addEventListener('ended',()=>{this.fallbackActive=false;this.fallbackResume=false;});
+      }
+      this.media.currentTime=0;this.syncVolume();this.fallbackActive=true;
+      this.media.play()?.catch(()=>{this.fallbackActive=false;});
+    }catch{this.fallbackActive=false;}
   }
-  stopVoices() {for(const source of this.voices){try{source.stop();}catch{}}this.voices.clear();}
-  suspend() {this.suspended=true;clearTimeout(this.musicTimer);if(this.ctx?.state==='running')this.ctx.suspend().catch(()=>{});}
-  async resume() {this.suspended=false;await this.unlock();if(this.musicOn)this.music(true);}
+  stopVoices() {
+    for(const source of this.voices){try{source.stop();}catch{}}this.voices.clear();
+    this.fallbackActive=false;this.fallbackResume=false;
+    if(this.media){this.media.pause();try{this.media.currentTime=0;}catch{}}
+  }
+  suspend() {
+    this.suspended=true;clearTimeout(this.musicTimer);
+    if(this.ctx?.state==='running')this.ctx.suspend().catch(()=>{});
+    if(this.fallbackActive&&this.media){this.fallbackResume=true;this.media.pause();}
+  }
+  async resume() {
+    this.suspended=false;await this.unlock();
+    // Visibility may have changed again while the context was resuming.
+    if(this.suspended)return;
+    if(this.musicOn)this.music(true);
+    if(this.fallbackActive&&this.fallbackResume&&this.media){this.fallbackResume=false;this.media.play()?.catch(()=>{this.fallbackActive=false;});}
+  }
   stop() {this.music(false);this.stopVoices();}
 }

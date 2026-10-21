@@ -1,0 +1,17 @@
+Deep scream sound effect
+
+Source: Male Screams [1] by marc3122 (a recorded human vocal performance)
+https://freesound.org/people/marc3122/sounds/556976/
+Original publication: February 5, 2021
+License: Creative Commons Zero 1.0 Universal (CC0)
+https://creativecommons.org/publicdomain/zero/1.0/
+Verified on October 21, 2026.
+
+Number Garden modifications: excerpt, two pitch-lowered layers, equalization,
+compression, short room echoes, limiting, fades, and MP3 encoding.
+The speech/voice is not AI-generated. No text-to-speech or synthesized vocal
+oscillators are used in this effect.
+
+The source permits copying, modifying, and distributing the sound, including
+commercial use. Attribution is provided voluntarily.
+Rebuild instructions: python3 scripts/build-scream.py (requires ffmpeg).

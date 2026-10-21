@@ -3,7 +3,7 @@ import { scene, scaleScene, updateScale } from './scenes.js';
 import { GardenAudio } from './audio.js';
 
 const $=id=>document.getElementById(id);
-const el={app:$('app'),welcome:$('welcome'),game:$('game'),ending:$('ending'),hud:$('hud'),footer:$('home-footer'),stage:$('stage'),tray:$('number-tray'),input:$('answer-input'),drop:$('answer-drop'),check:$('check-answer'),card:$('puzzle-card'),feedback:$('feedback'),scare:$('scare'),wrong:$('wrong-message'),modal:$('modal-layer'),canvas:$('particles')};
+const el={app:$('app'),welcome:$('welcome'),game:$('game'),ending:$('ending'),hud:$('hud'),footer:$('home-footer'),stage:$('stage'),tray:$('number-tray'),input:$('answer-input'),drop:$('answer-drop'),check:$('check-answer'),card:$('puzzle-card'),feedback:$('feedback'),scare:$('scare'),modal:$('modal-layer'),canvas:$('particles')};
 const icon=name=>`<svg aria-hidden="true"><use href="#i-${name}"/></svg>`;
 const motionQuery=window.matchMedia('(prefers-reduced-motion: reduce)');
 let prefs={muted:false,volume:.55,reduced:motionQuery.matches};
@@ -58,7 +58,7 @@ function setScreen(screen){
 function clearEffects(){
   cancelDrag();audio.stop();particles=[];context?.clearRect(0,0,canvasWidth,canvasHeight);
   cancelAnimationFrame(raf);raf=0;lastTime=0;
-  el.scare.hidden=true;delete el.scare.dataset.phase;el.wrong.textContent='';
+  el.scare.hidden=true;delete el.scare.dataset.phase;
   el.app.removeAttribute('inert');el.app.removeAttribute('aria-hidden');
   el.feedback.hidden=true;el.card.classList.remove('correct','retry');
 }
@@ -74,14 +74,14 @@ function start(){
 }
 function updateProgress(){
   $('progress').innerHTML=QUESTIONS.map((q,i)=>`<span class="progress-step ${i<state.question?'done':i===state.question?'active':''}" ${i===state.question?'aria-current="step"':''} aria-label="Puzzle ${i+1}${i<state.question?', completed':i===state.question?', current':''}">${i<state.question?'✓':i+1}</span>`).join('');
-  $('progress').setAttribute('aria-label',`Puzzle ${state.question+1} of 7`);$('score').textContent=state.stars;
+  $('progress').setAttribute('aria-label',`Puzzle ${state.question+1} of ${QUESTIONS.length}`);$('score').textContent=state.stars;
 }
 function showQuestion(){
   cancelDrag();state.selected=null;state.phase='playing';state.elapsed=0;state.typed=false;state.counted.clear();
   const q=QUESTIONS[state.question];
   el.feedback.hidden=true;el.card.classList.remove('correct','retry');
   $('question-tag').textContent=q.tag;$('question-title').textContent=q.title;$('question-hint').textContent=q.hint;
-  $('question-count').textContent=`PUZZLE ${String(state.question+1).padStart(2,'0')} / 07`;
+  $('question-count').textContent=`PUZZLE ${String(state.question+1).padStart(2,'0')} / ${String(QUESTIONS.length).padStart(2,'0')}`;
   $('equation-text').textContent=q.missing?'3 +':q.kind==='pattern'?'2, 4, 6,':q.equation;
   $('equals').textContent=q.missing?'':q.kind==='pattern'?'':'=';
   $('equals').hidden=q.missing||q.kind==='pattern';
@@ -92,7 +92,7 @@ function showQuestion(){
   el.tray.innerHTML=q.choices.map(n=>`<button class="number-tile" data-value="${n}" aria-label="Choose ${n}" aria-pressed="false">${n}</button>`).join('');
   el.check.innerHTML=`Check answer ${icon('check')}`;el.check.disabled=true;
   renderScene(true);updateProgress();
-  $('encouragement').textContent=['Every little try helps you grow.','Look at you, growing already.','One little hop at a time.','Curiosity looks good on you.','Small things add up to something lovely.','You’re getting the hang of this.','One more. You’ve got this.'][state.question];
+  $('encouragement').textContent=['Every little try helps you grow.','Look at you, growing already.','One little hop at a time.','Curiosity looks good on you.','Small things add up to something lovely.'][state.question];
   // Announce the new question without opening a phone keyboard.
   $('question-title').setAttribute('tabindex','-1');$('question-title').focus({preventScroll:true});
 }
@@ -131,7 +131,7 @@ function submit(){
   el.feedback.hidden=false;el.feedback.className='feedback';
   if(result==='correct'){
     state.stars++;$('score').textContent=state.stars;el.card.classList.add('correct');
-    el.feedback.textContent=['Beautiful balance!','Berry clever!','Hop, hop, hooray!','A perfect match!','Lovely counting!','You’ve got it!'][state.question];
+    el.feedback.textContent=['Beautiful balance!','Berry clever!','Hop, hop, hooray!','A perfect match!'][state.question];
     audio.correct();confetti();
   }else{
     el.card.classList.add('retry');el.feedback.classList.add('retry');el.feedback.textContent='Almost! Give it another try.';audio.retry();
@@ -146,11 +146,8 @@ function beginScare(){
 function applyScarePhase(index){
   state.scareStep=index;const phase=SCARE_PHASES[index];
   if(phase.name==='finished'){finish();return;}
-  el.scare.dataset.phase=phase.name;el.wrong.textContent=phase.text;
-  if(index===0){audio.dread();audio.wrong(0);}
-  if(index===1)audio.wrong(1);
-  if(index===2)audio.wrong(2);
-  if(phase.name==='silence'||phase.name==='after')audio.stopVoices();
+  el.scare.dataset.phase=phase.name;
+  if(phase.name==='after')audio.stopVoices();
   if(phase.name==='jump')audio.scream();
 }
 function finish(){clearEffects();state.phase='finished';setScreen('ending');$('replay').focus({preventScroll:true});}
@@ -263,7 +260,7 @@ function closeModal(restore=true){
 function syncPause(){
   document.body.classList.toggle('paused',paused());
   if(paused()){cancelDrag();cancelAnimationFrame(raf);raf=0;audio.suspend();}
-  else{lastTime=0;if(audio.ctx)audio.resume();wake();}
+  else{lastTime=0;if(audio.ctx||audio.fallbackActive)audio.resume();wake();}
 }
 document.addEventListener('visibilitychange',syncPause);
 window.addEventListener('pagehide',()=>{cancelDrag();audio.suspend();cancelAnimationFrame(raf);raf=0;});

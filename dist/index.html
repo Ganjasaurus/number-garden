@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#f8f7ef">
-  <meta name="description" content="A happy little playground for curious minds. Balance, count, and hop your way through seven colorful math puzzles.">
+  <meta name="description" content="A happy little playground for curious minds. Balance, count, and hop your way through five colorful math puzzles.">
   <title>Number Garden · A little play. A lot of aha!</title>
   <link rel="icon" type="image/svg+xml" href="./assets/icon.svg">
   <link rel="stylesheet" href="./style.css">
@@ -29,7 +29,7 @@
   <div id="app" class="app" data-screen="home">
     <header class="topbar">
       <button class="brand" id="brand-home" aria-label="Number Garden home"><span class="brand-mark"><svg><use href="#i-sprout"/></svg></span><span>number<span class="brand-second">garden</span><i>✦</i></span></button>
-      <div class="hud" id="hud" hidden><div class="progress" id="progress" aria-label="Puzzle progress"></div><span class="score"><svg><use href="#i-star"/></svg><b id="score">0</b><span>/ 7</span></span></div>
+      <div class="hud" id="hud" hidden><div class="progress" id="progress" aria-label="Puzzle progress"></div><span class="score"><svg><use href="#i-star"/></svg><b id="score">0</b><span>/ 5</span></span></div>
       <div class="top-actions">
         <button class="icon-button" id="sound-toggle" title="Mute sound" aria-label="Mute sound" aria-pressed="false"><svg><use href="#i-sound"/></svg></button>
         <button class="icon-button fullscreen-button" id="fullscreen" title="Fullscreen" aria-label="Enter fullscreen"><svg><use href="#i-full"/></svg></button>
@@ -45,7 +45,7 @@
           <p>A happy little playground<br>for curious minds.</p>
           <button class="primary start-button" id="start">Let’s play <svg><use href="#i-arrow"/></svg></button>
           <button class="text-button how-button" id="how"><span class="question-icon">?</span> How to play</button>
-          <div class="welcome-note"><span class="note-dot"></span> 7 little puzzles. Take your time.</div>
+          <div class="welcome-note"><span class="note-dot"></span> 5 little puzzles. Take your time.</div>
         </div>
         <div class="welcome-art" aria-hidden="true">
           <div class="art-blob"></div>
@@ -61,7 +61,7 @@
       </section>
 
       <section class="game screen" id="game" aria-labelledby="question-title" hidden>
-        <div class="game-topline"><button class="text-button back-button" id="back-home"><svg><use href="#i-home"/></svg><span>Garden</span></button><span id="question-count">PUZZLE 01 / 07</span><span class="take-time">No rush. You’ve got this.</span></div>
+        <div class="game-topline"><button class="text-button back-button" id="back-home"><svg><use href="#i-home"/></svg><span>Garden</span></button><span id="question-count">PUZZLE 01 / 05</span><span class="take-time">No rush. You’ve got this.</span></div>
         <div class="puzzle-card" id="puzzle-card">
           <div class="question-heading"><span class="tag" id="question-tag">Balance it</span><h1 id="question-title">A little balancing act.</h1><p id="question-hint">Which number makes the two sides equal?</p></div>
           <div class="play-stage" id="stage" aria-label="Interactive math puzzle"></div>
@@ -76,7 +76,7 @@
       </section>
 
       <section class="ending screen" id="ending" aria-labelledby="ending-title" hidden>
-        <div class="end-symbol">7<span>✓</span></div><p class="eyebrow">LESSON COMPLETE</p><h1 id="ending-title">You were right.</h1><p>It was never about the numbers.</p><div class="end-actions"><button class="primary" id="replay">Play again <svg><use href="#i-reset"/></svg></button><button class="text-button" id="end-home">Back to the garden</button></div><span class="end-footnote">6 little stars. 1 big surprise.</span>
+        <div class="end-symbol">5<span>✓</span></div><p class="eyebrow">LESSON COMPLETE</p><h1 id="ending-title">You were right.</h1><p>It was never about the numbers.</p><div class="end-actions"><button class="primary" id="replay">Play again <svg><use href="#i-reset"/></svg></button><button class="text-button" id="end-home">Back to the garden</button></div><span class="end-footnote">4 little stars. 1 big surprise.</span>
       </section>
     </main>
     <footer class="home-footer" id="home-footer"><span>MADE FOR LITTLE MOMENTS OF WONDER</span><div><i></i><i></i><i></i><span>Let good things grow.</span></div></footer>
@@ -85,7 +85,7 @@
   <div class="modal-layer" id="modal-layer" hidden>
     <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><button class="icon-button modal-close" id="modal-close" aria-label="Close dialog"><svg><use href="#i-close"/></svg></button><div id="modal-content"></div></section>
   </div>
-  <div class="scare" id="scare" aria-live="assertive" hidden><div class="wrong-message" id="wrong-message"></div><img id="creature" src="./assets/creature.webp" alt="A screaming forest monster" decoding="async"><div class="scare-vignette"></div><button id="leave-scare" class="scare-exit" aria-label="Exit sequence">Esc <svg><use href="#i-close"/></svg></button></div>
+  <div class="scare" id="scare" aria-live="assertive" hidden><img id="creature" src="./assets/creature.webp" alt="A screaming forest monster" decoding="async"><div class="scare-vignette"></div><button id="leave-scare" class="scare-exit" aria-label="Exit sequence">Esc <svg><use href="#i-close"/></svg></button></div>
   <canvas id="particles" class="particles" aria-hidden="true"></canvas>
   <noscript><div class="noscript">Number Garden needs JavaScript to play. Please turn it on in your browser.</div></noscript>
   <script type="module" src="./game.js"></script>

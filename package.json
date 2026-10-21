@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "A tactile math playground with an unexpected seventh lesson.",
+  "description": "A tactile math playground with an unexpected fifth lesson.",
   "scripts": {
     "build": "npm run check",
     "start": "python3 -m http.server 4173 --directory dist",
