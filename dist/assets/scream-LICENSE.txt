@@ -1,4 +1,4 @@
-Deep scream sound effect
+Demonic scream and groan sound effect
 
 Source: Male Screams [1] by marc3122 (a recorded human vocal performance)
 https://freesound.org/people/marc3122/sounds/556976/
@@ -7,8 +7,10 @@ License: Creative Commons Zero 1.0 Universal (CC0)
 https://creativecommons.org/publicdomain/zero/1.0/
 Verified on October 21, 2026.
 
-Number Garden modifications: excerpt, two pitch-lowered layers, equalization,
-compression, short room echoes, limiting, fades, and MP3 encoding.
+Number Garden modifications: scream and grunt excerpts; lead pitched to 64%,
+low body to 40%, and trailing groan to 55% of their original sample rates;
+equalization, compression, soft saturation, short room echoes, peak limiting,
+fades, and MP3 encoding. Duration: 3.20 seconds. Reworked October 22, 2026.
 The speech/voice is not AI-generated. No text-to-speech or synthesized vocal
 oscillators are used in this effect.
 

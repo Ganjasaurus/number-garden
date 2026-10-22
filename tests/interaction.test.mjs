@@ -28,9 +28,17 @@ function setup({storageBroken=false,reduced=false}={}){
   function select(n){const b=w.document.querySelector(`[data-value="${n}"]`);assert.ok(b,`choice ${n} exists`);b.click();}
   function input(value){$('answer-input').value=String(value);$('answer-input').dispatchEvent(new w.Event('input',{bubbles:true}));}
   function key(key,target=w.document.body,options={}){target.dispatchEvent(new w.KeyboardEvent('keydown',{key,bubbles:true,cancelable:true,...options}));}
-  function five(){click('start');for(let i=0;i<4;i++){select(core.QUESTIONS[i].answer);click('check-answer');advance(1450);}assert.equal($('question-count').textContent,'PUZZLE 05 / 05');}
+  function four(){
+    click('start');for(let i=0;i<3;i++){select(core.QUESTIONS[i].answer);click('check-answer');advance(1450);}
+    assert.equal($('question-count').textContent,'PUZZLE 04 / 05');
+    const steps=[...$('progress').children];assert.equal(steps.length,5);
+    assert.equal(steps.filter(step=>step.classList.contains('done')).length,3);
+    assert.equal(steps[3].getAttribute('aria-current'),'step');
+    assert.equal(steps[4].textContent,'5');assert.equal(steps[4].classList.contains('done'),false);
+    assert.equal(steps[4].hasAttribute('aria-current'),false);
+  }
   function pointer(target,type,x,y,id=1){const event=new w.Event(type,{bubbles:true,cancelable:true});Object.assign(event,{clientX:x,clientY:y,pointerId:id,button:0,isPrimary:true});target.dispatchEvent(event);}
-  return {w,$,advance,click,select,input,key,five,pointer,log,frames,hide(value){hidden=value;w.document.dispatchEvent(new w.Event('visibilitychange'));},close(){dom.window.close();}};
+  return {w,$,advance,click,select,input,key,four,pointer,log,frames,hide(value){hidden=value;w.document.dispatchEvent(new w.Event('visibilitychange'));},close(){dom.window.close();}};
 }
 
 test('a mistaken early answer retries without earning a star; a correct answer advances once',()=>{
@@ -41,14 +49,15 @@ test('a mistaken early answer retries without earning a star; a correct answer a
     assert.equal(t.$('score').textContent,'1');assert.equal(t.$('question-count').textContent,'PUZZLE 02 / 05');assert.equal(t.$('answer-input').value,'');
   }finally{t.close();}
 });
-for(const finalAnswer of [0,6,99])test(`complete playthrough with final answer ${finalAnswer}: all scare stages and clean replay`,()=>{
+for(const finalAnswer of [0,5,99])test(`complete playthrough with fourth answer ${finalAnswer}: five icons, immediate scare, and clean replay`,()=>{
   const t=setup();try{
-    t.five();t.input(finalAnswer);t.click('check-answer');
+    t.four();t.input(finalAnswer);t.click('check-answer');
     assert.equal(t.$('scare').dataset.phase,'jump');assert.equal(t.$('wrong-message'),null);
-    assert.equal(t.$('progress').children.length,5);assert.equal(t.$('score').textContent,'4');
+    assert.equal(t.$('progress').children.length,5);assert.equal(t.$('score').textContent,'3');
+    assert.equal(t.$('question-count').textContent,'PUZZLE 04 / 05');
     assert.equal(t.$('feedback').hidden,true);assert.equal(t.log.filter(v=>v==='scream').length,1);
     t.click('check-answer');assert.equal(t.log.filter(v=>v==='scream').length,1);
-    t.advance(2400);assert.equal(t.$('scare').dataset.phase,'jump');
+    t.advance(3000);assert.equal(t.$('scare').dataset.phase,'jump');
     t.advance(350);assert.equal(t.$('scare').dataset.phase,'after');
     t.advance(800);assert.equal(t.$('app').dataset.screen,'ending');assert.equal(t.$('scare').hidden,true);
     t.click('replay');assert.equal(t.$('question-count').textContent,'PUZZLE 01 / 05');assert.equal(t.$('score').textContent,'0');
@@ -57,7 +66,7 @@ for(const finalAnswer of [0,6,99])test(`complete playthrough with final answer $
 });
 test('tab visibility freezes the direct scare and escape cancels it cleanly',()=>{
   const t=setup();try{
-    t.five();t.select(6);t.click('check-answer');t.advance(500);assert.equal(t.$('scare').dataset.phase,'jump');
+    t.four();t.select(5);t.click('check-answer');t.advance(500);assert.equal(t.$('scare').dataset.phase,'jump');
     t.hide(true);t.advance(30000);assert.equal(t.$('scare').dataset.phase,'jump');
     t.hide(false);t.advance(800);assert.equal(t.$('scare').dataset.phase,'jump');
     assert.equal(t.log.filter(v=>v==='scream').length,1);
@@ -97,7 +106,7 @@ test('rotation cancels a live drag, settings pause progression, and focus stays 
     t.click('modal-done');t.advance(1450);assert.equal(t.$('question-count').textContent,'PUZZLE 02 / 05');
   }finally{t.close();}
 });
-test('berries and flowers are countable, frog pads choose answers, and reduced motion persists',()=>{
+test('berries are countable, frog pads choose answers, and reduced motion persists',()=>{
   const t=setup({reduced:true});try{
     t.click('start');t.select(5);t.click('check-answer');t.advance(1450);
     const berry=t.w.document.querySelector('[data-count-item="0"]');berry.dispatchEvent(new t.w.MouseEvent('click',{bubbles:true}));assert.equal(berry.getAttribute('aria-pressed'),'true');
@@ -107,12 +116,11 @@ test('berries and flowers are countable, frog pads choose answers, and reduced m
   }finally{t.close();}
 });
 
-test('empty or invalid fifth input never starts the scare, and flowers remain countable',()=>{
+test('empty or invalid fourth input never starts the scare; a valid keyboard answer does',()=>{
   const t=setup();try{
-    t.five();t.input('');t.key('Enter',t.$('answer-input'));assert.equal(t.$('scare').hidden,true);
+    t.four();t.input('');t.key('Enter',t.$('answer-input'));assert.equal(t.$('scare').hidden,true);
     t.input('abc');t.key('Enter',t.$('answer-input'));assert.equal(t.$('scare').hidden,true);
-    const flower=t.w.document.querySelector('[data-count-item="0"]');
-    flower.dispatchEvent(new t.w.MouseEvent('click',{bubbles:true}));assert.equal(flower.getAttribute('aria-pressed'),'true');
-    t.input('6');t.key('Enter',t.$('answer-input'));assert.equal(t.$('scare').dataset.phase,'jump');
+    assert.equal(t.$('equation-suffix').textContent,'= 8');
+    t.input('5');t.key('Enter',t.$('answer-input'));assert.equal(t.$('scare').dataset.phase,'jump');
   }finally{t.close();}
 });

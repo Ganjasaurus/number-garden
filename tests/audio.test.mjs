@@ -12,7 +12,7 @@ function harness(t,{decodeFails=false,noContext=false,fetchFails=false}={}) {
     createDynamicsCompressor(){return {...node(),threshold:param(),knee:param(),ratio:param(),attack:param(),release:param()};}
     createBufferSource(){const source={...node(),starts:0,stops:[],start(){this.starts++;},stop(time){this.stops.push(time);}};this.sources.push(source);return source;}
     createOscillator(){const source={...node(),frequency:param(),start(){},stop(){this.stopped=true;}};this.oscillators.push(source);return source;}
-    async decodeAudioData(){this.decoded++;if(decodeFails)throw new Error('decode unavailable');return {duration:2.55};}
+    async decodeAudioData(){this.decoded++;if(decodeFails)throw new Error('decode unavailable');return {duration:3.20};}
     async suspend(){this.state='suspended';}
     async resume(){this.state='running';}
   }
@@ -32,7 +32,7 @@ function harness(t,{decodeFails=false,noContext=false,fetchFails=false}={}) {
 test('the real scream preloads and decodes once, plays immediately, and replaces music voices',async t=>{
   const h=harness(t),audio=new GardenAudio();
   await audio.unlock();await audio.screamReady;await audio.unlock();
-  assert.equal(h.requests.length,1);assert.ok(h.requests[0].endsWith('/assets/scream-deep.mp3'));
+  assert.equal(h.requests.length,1);assert.ok(h.requests[0].endsWith('/assets/scream-demonic.mp3'));
   assert.equal(h.contexts[0].decoded,1);
   audio.music(true);const notes=h.contexts[0].oscillators.length;assert.ok(notes>0);
   audio.scream();assert.equal(audio.musicOn,false);assert.ok(h.contexts[0].oscillators.every(o=>o.stopped));
@@ -57,7 +57,7 @@ test('mute suppresses the scare, volume changes apply immediately, and exit stop
 test('decode failure uses the same real recording through native audio and respects pause and cancellation',async t=>{
   const h=harness(t,{decodeFails:true}),audio=new GardenAudio();
   await audio.unlock();await audio.screamReady;audio.scream();assert.equal(h.media.length,1);
-  const media=h.media[0];assert.ok(media.src.endsWith('/assets/scream-deep.mp3'));assert.equal(media.plays,1);
+  const media=h.media[0];assert.ok(media.src.endsWith('/assets/scream-demonic.mp3'));assert.equal(media.plays,1);
   audio.setMuted(true);assert.equal(media.muted,true);audio.setMuted(false);audio.setVolume(.2);assert.equal(media.volume,.2*.65);
   audio.suspend();assert.equal(media.paused,true);await audio.resume();assert.equal(media.plays,2);
   audio.suspend();audio.stop();await audio.resume();assert.equal(media.plays,2);assert.equal(audio.fallbackActive,false);

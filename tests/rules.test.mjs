@@ -4,15 +4,15 @@ import { readFileSync,statSync,readdirSync } from 'node:fs';
 import { resolve,join } from 'node:path';
 import { QUESTIONS,judge,parseAnswer,Spring,uiLayout } from '../dist/core.js';
 
-test('every numeric answer to puzzle five triggers the finale, including the correct answer',()=>{
+test('every numeric answer to puzzle four triggers the finale, with five puzzles retained',()=>{
   assert.equal(QUESTIONS.length,5);
-  assert.equal(QUESTIONS[4].answer,6);
-  for(let answer=0;answer<=99;answer++)assert.equal(judge(4,answer),'scare',String(answer));
-  assert.equal(judge(4,''),'empty');assert.equal(judge(4,'abc'),'empty');
+  assert.equal(QUESTIONS[3].answer,8-3);
+  for(let answer=0;answer<=99;answer++)assert.equal(judge(3,answer),'scare',String(answer));
+  assert.equal(judge(3,''),'empty');assert.equal(judge(3,'abc'),'empty');
 });
-test('the first four puzzles have coherent arithmetic and allow retry',()=>{
-  const expected=[3+2,4+3,9-3,8-3];
-  for(let i=0;i<4;i++){
+test('the first three puzzles have coherent arithmetic and allow retry',()=>{
+  const expected=[3+2,4+3,9-3];
+  for(let i=0;i<3;i++){
     assert.equal(QUESTIONS[i].answer,expected[i]);assert.equal(judge(i,expected[i]),'correct');
     assert.equal(judge(i,expected[i]+1),'retry');assert.ok(QUESTIONS[i].choices.includes(expected[i]));
     assert.equal(new Set(QUESTIONS[i].choices).size,QUESTIONS[i].choices.length);

@@ -1,5 +1,5 @@
 // Music is synthesized locally; the scare uses a bundled, processed human recording.
-const SCREAM_URL = new URL('./assets/scream-deep.mp3', import.meta.url);
+const SCREAM_URL = new URL('./assets/scream-demonic.mp3', import.meta.url);
 export class GardenAudio {
   constructor({ muted=false, volume=.55 }={}) {
     this.muted=muted;this.volume=volume;this.ctx=null;this.voices=new Set();this.musicTimer=0;this.musicOn=false;this.beat=0;this.suspended=false;

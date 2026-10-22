@@ -1,5 +1,5 @@
-// Pure game rules. The fifth submission triggers the scare before correctness is checked.
-export const SCARE_QUESTION = 4;
+// The fourth submission triggers the scare; the HUD still promises five puzzles.
+export const SCARE_QUESTION = 3;
 export const QUESTIONS = Object.freeze([
   { kind: 'balance', tag: 'Balance it', title: 'A little balancing act.', hint: 'Which number makes the two sides equal?', left: [3, 2], right: [], answer: 5, choices: [4, 5, 6, 7], equation: '3 + 2' },
   { kind: 'count', tag: 'Count together', title: 'A berry good question.', hint: 'How many berries are there altogether?', groups: [4, 3], answer: 7, choices: [5, 6, 7, 8], equation: '4 + 3' },
@@ -22,8 +22,8 @@ export function judge(index, value) {
 
 export const SCARE_PHASES = Object.freeze([
   { at: 0, name: 'jump' },
-  { at: 2600, name: 'after' },
-  { at: 3350, name: 'finished' }
+  { at: 3250, name: 'after' },
+  { at: 4000, name: 'finished' }
 ]);
 
 export function uiLayout(width, height) {
