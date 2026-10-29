@@ -6,7 +6,7 @@ import * as core from '../dist/core.js';
 import * as scenes from '../dist/scenes.js';
 
 const html=readFileSync(new URL('../dist/index.html',import.meta.url),'utf8');
-const source=readFileSync(new URL('../dist/game.js',import.meta.url),'utf8').replace(/^import .*;\n/gm,'');
+const source=readFileSync(new URL('../dist/game.js',import.meta.url),'utf8').replace(/^import .*;\r?\n/gm,'');
 function setup({storageBroken=false,reduced=false}={}){
   const dom=new JSDOM(html,{url:'https://example.test/games/garden/',runScripts:'outside-only',pretendToBeVisual:true});
   const w=dom.window,log=[],frames=new Map();let next=0,time=0,hidden=false;

@@ -205,7 +205,7 @@ el.tray.addEventListener('pointerdown',e=>{
 });
 el.tray.addEventListener('pointermove',e=>{
   if(!drag||drag.id!==e.pointerId)return;
-  if(!drag.ghost&&Math.hypot(e.clientX-drag.startX,e.clientY-drag.startY)>18){
+  const dragThreshold=typeof navigator!=="undefined"&&/Xbox/i.test(navigator.userAgent)?18:7;if(!drag.ghost&&Math.hypot(e.clientX-drag.startX,e.clientY-drag.startY)>dragThreshold){
     drag.ghost=drag.tile.cloneNode(true);drag.ghost.className='number-tile drag-ghost';drag.ghost.removeAttribute('data-value');drag.ghost.setAttribute('aria-hidden','true');drag.ghost.tabIndex=-1;
     const css=getComputedStyle(drag.tile);for(const key of ['--tile-bg','--tile-ink','--tile-edge'])drag.ghost.style.setProperty(key,css.getPropertyValue(key));
     const r=drag.tile.getBoundingClientRect();drag.width=r.width;drag.height=r.height;drag.ghost.style.width=`${r.width}px`;drag.ghost.style.height=`${r.height}px`;
@@ -215,8 +215,7 @@ el.tray.addEventListener('pointermove',e=>{
 });
 el.tray.addEventListener('pointerup',e=>{
   if(!drag||drag.id!==e.pointerId)return;
-  const overSelf=drag.tile?.contains(document.elementFromPoint(e.clientX,e.clientY));
-  const value=drag.value,wasDrag=!!drag.ghost,accepted=!wasDrag||overSelf||hitDrop(e.clientX,e.clientY);cancelDrag();
+  const value=drag.value,wasDrag=!!drag.ghost,accepted=!wasDrag||hitDrop(e.clientX,e.clientY);cancelDrag();
   if(accepted){choose(value);if(wasDrag)audio.drop();}
 });
 el.tray.addEventListener('pointercancel',cancelDrag);
